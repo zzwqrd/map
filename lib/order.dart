@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get_map/constans.dart';
@@ -17,6 +19,11 @@ class _OrderState extends State<Order> {
   GoogleMapController? _controller;
   Location currentLocation = Location();
   Set<Marker> _markers = {};
+  dynamic datalat;
+  dynamic datalong;
+
+  final ref = FirebaseDatabase.instance.reference();
+  final _refss = FirebaseDatabase.instance.ref().child("Tasks");
 
   void getLocation() async {
     var location = await currentLocation.getLocation();
@@ -29,6 +36,13 @@ class _OrderState extends State<Order> {
       print('🍄🍄🍄🍄🍄🍄==-=.long.=-==🍄🍄🍄🍄🍄🍄${loc.longitude.toString()}🍄🍄🍄🍄🍄🍄🍄🍄🍄🍄🍄🍄');
       setState(() {
         _markers.add(Marker(markerId: MarkerId('Home'), position: LatLng(loc.latitude ?? 0.0, loc.longitude ?? 0.0)));
+        ref.set({
+          "datalat": loc.latitude.toString(),
+          "datalong": loc.longitude.toString(),
+          "address": {"line1": "100 Mountain View"}
+        });
+        datalat = loc.latitude;
+        datalong = loc.longitude;
       });
     });
   }
@@ -38,14 +52,20 @@ class _OrderState extends State<Order> {
     setState(() {
       getLocation();
     });
+
+    print('🌿🌿🌿🌿🌿🌿🌿🌿🌿==-=.datalat.=-==🌿🌿🌿🌿🌿🌿🌿🌿🌿${datalat.toString()}🌿🌿🌿🌿🌿🌿🌿🌿🌿');
+    print('🌿🌿🌿🌿🌿🌿🌿🌿🌿==-=.datalong.=-==🌿🌿🌿🌿🌿🌿🌿🌿🌿${datalong.toString()}🌿🌿🌿🌿🌿🌿🌿🌿🌿');
+
     super.initState();
   }
 
+  DatabaseReference refddd = FirebaseDatabase.instance.ref("users/123");
   @override
   Widget build(BuildContext context) {
+    final daily = ref.child('/dddd');
     return Scaffold(
       appBar: AppBar(
-        title: Text("Map"),
+        title: const Text("Map"),
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -54,9 +74,9 @@ class _OrderState extends State<Order> {
           zoomControlsEnabled: true,
           mapToolbarEnabled: true,
           myLocationButtonEnabled: true,
-          initialCameraPosition: CameraPosition(
+          initialCameraPosition: const CameraPosition(
             target: LatLng(31.046096835297483, 31.353678881570186),
-            zoom: 50.5,
+            zoom: 17.0,
           ),
           onMapCreated: (GoogleMapController controller) {
             _controller = controller;
@@ -65,13 +85,17 @@ class _OrderState extends State<Order> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(
+        child: const Icon(
           Icons.location_searching,
           color: Colors.white,
         ),
-        onPressed: () {
+        onPressed: () async {
           setState(() {
             getLocation();
+            print('🌿🌿🌿🌿🌿🌿🌿🌿🌿==-=.datalat.=-==🌿🌿🌿🌿🌿🌿🌿🌿🌿${datalat.toString()}🌿🌿🌿🌿🌿🌿🌿🌿🌿');
+            print('🌿🌿🌿🌿🌿🌿🌿🌿🌿==-=.datalong.=-==🌿🌿🌿🌿🌿🌿🌿🌿🌿${datalong.toString()}🌿🌿🌿🌿🌿🌿🌿🌿🌿');
+            // r.child(datalat.toString()).push().child(datalong.toString()).set(_controller).asStream();
+            // _refss.child(datalat.toString()).set(_controller.toString());
           });
         },
       ),
